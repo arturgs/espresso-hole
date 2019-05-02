@@ -14,6 +14,7 @@ Network wish list:
 - WIFI access point
 - media server
 
+![Alt text](images/MotherBoard_1.png)
 
 ## Armbian installation
 
