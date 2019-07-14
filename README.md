@@ -25,24 +25,24 @@ The ESPRESSObin is provided without power supply or case. I'm using an old route
 
 
 ### External disk
-The ESPRESSObin supports an external drive through a SATA connector. However, in v5 of the board (v7 is available now) the power connector is a molex-type connector. An adaptor to SATA power can be easily done, but minor soldering habilities are required.
+The ESPRESSObin supports an external drive through a SATA connector. However, in v5 of the board the power connector is a molex-type connector (in v7 this has been replaced by a proper SATA power connector). An adaptor to SATA power can be easily done, and no soldering habilities are required.
 
 ![SATA](images/sata_connector.JPG)
 
-![open_box](images/open_box.JPG)
-
-
 ### USB wireless
 
-For wireless connection a USB WiFi dongle based on RT5370. Notice that not any dongle will work, or will be able to be set in AP mode.
+For wireless connection a USB WiFi dongle based on RT5370. Notice that not any dongle will work, or will be able to work in AP mode.
 
 ### 3D printed case
 The ESPRESSObin comes without a case. A number of slutions are available, I specially like [this one](https://upon2020.com/blog/2017/12/3d-printable-box-for-the-espressobin-plus-a-hard-disk/). The [STL file](https://www.thingiverse.com/thing:2707086) provided includes the two parts together, so I provide a [folder](http://github.com/arturgs/espresso-hole/tree/master/case_3d_print) with two separated parts.
 
 The case is designed with room for a 25mm fan like [this one](https://www.banggood.com/Hobbywing-5V-7V-150A-DC-Cooling-Fan-For-RC-Model-Motor-ESC-253040mm-Power-Transfer-p-1067266.html?rmmds=myorder&ID=47301&cur_warehouse=CN). On normal operation I find the fan too noisy and temperature levels have never been dangerous without the fan.
 
+![open_box](images/open_box.JPG)
+
+
 ## Armbian installation
-The ESPRESSObin is fully supported by [ARMBIAN](https://docs.armbian.com). Installation can be done easily [as explained here](https://www.armbian.com/espressobin/).
+The ESPRESSObin is fully supported by [ARMBIAN](https://docs.armbian.com). Installation can be done easily [as explained here](https://www.armbian.com/espressobin/). The installation process can be controlled from a USB serial connection to a host computer running kermit using [this config file](files/kermit-usb0).
 
 ## Network configuration
 
@@ -67,15 +67,56 @@ iface br0 inet static
     network 192.168.22.0
 ```
 
+To reroute traffic from `br0` to `wan` we have to forward the traffic:
+``` bash
+echo 1 > /proc/sys/net/ipv4/ip_forward
+```
+and
+```bash
+iptables -t nat -A POSTROUTING -o wan -j MASQUERADE
+```
+In case we set up a VPN connection from the ESPRESSObin, the device name has to be replaced in the iptables entry, i.e. with a `tun0` device on the VPN:
+```bash
+iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE
+```
 
 ### PI-HOLE installation
 
+The PI-HOLE will take charge of virtually all inner network configuration. Any device getting DHCP configuration from the ESPRESSObin will have unwanted traffic blocked :)
 
+Two important configuration fields have to be set in the pi-hole installer. The device used by the pi-hole is `br0` from the list. Also, the gateway used to route traffic to the internet is the router gateway `192.168.0.1`.
 
-### HostApd service
+![pi config 1](images/pi_1.png)
+
+![pi config 2](images/pi_2.png)
+
+### Wireless AP service
+
+The WiFi dongle creates a Wireless network using Hostapd. THe network properties are defined in `/etc/hostapd.conf`:
+```
+ssid=ARMBIAN
+interface=wlan0
+hw_mode=g
+channel=1
+
+bridge=br0
+driver=nl80211
+ignore_broadcast_ssid=0
+wmm_enabled=1
+wpa=2
+preamble=1
+
+wpa_psk=********
+wpa_passphrase=********
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+auth_algs=1
+macaddr_acl=0
+```
 
 ## Media Server
 
-Uploading some files to the ESPRESSObin and installing PLEX turns this box into a media server with web interface. Other options tested (i.e. OpenMediaVault) were not so compatible with other devices -TV or network speakers- running at home.
+Uploading some files to the ESPRESSObin and installing [PLEX](https://www.plex.tv) turns this box into a media server with web interface. Other options tested (i.e. OpenMediaVault) were not so compatible with other devices -TV or network speakers- running at home.
 
 ![open_box](images/final_box.JPG)
