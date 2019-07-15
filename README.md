@@ -1,4 +1,4 @@
-# ESPRESSO-hole: ESPRESSObin based personal router with ad blocking.
+# ESPRESSO-hole: ESPRESSObin-based personal router with ad blocking.
 
 This project was born as a solution to a set of requirements for a home box/router.
 
@@ -50,7 +50,7 @@ The plan is to have an ESPRESSObin routing all the network traffic. The ESPRESSO
 
 ![network](images/network.png)
 
-An additional port `wlan0` is used by the WiFi dongle. These 3 inside ports `lan0`, `lan1` and `wlan0` are grouped in a bridge device. The router subnet `191.268.0.0` will be visible through `wan` device set at `192.168.0.2` fixed IP. The home network is now `192.168.22.0` and the bridge address is set to `192.168.22.1`. 
+An additional port `wlan0` is used by the WiFi dongle. These 3 inside ports `lan0`, `lan1` and `wlan0` are grouped in a bridge device. The router subnet `191.168.0.0` will be visible through `wan` device set at `192.168.0.2` fixed IP. The home network is now `192.168.22.0` and the bridge address is set to `192.168.22.1`. 
 
 The network is configured using `/etc/network/interfaces`:
 ```
@@ -92,7 +92,7 @@ Two important configuration fields have to be set in the pi-hole installer. The 
 
 ### Wireless AP service
 
-The WiFi dongle creates a Wireless network using Hostapd. THe network properties are defined in `/etc/hostapd.conf`:
+The WiFi dongle creates a Wireless network using Hostapd. The network properties are defined in `/etc/hostapd.conf`:
 ```
 ssid=ARMBIAN
 interface=wlan0
